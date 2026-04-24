@@ -1,0 +1,116 @@
+# Only Farmers - Backend Architecture & API Plan
+
+This document outlines the essential data models and RESTful API endpoints required to make the Only Farmers frontend fully functional.
+
+## 1. Data Models (Database Schema Concepts)
+
+### User Model
+- `id` (UUID)
+- `name` (String)
+- `email` (String, unique)
+- `passwordHash` (String)
+- `role` (Enum: 'BUYER', 'FARMER', 'ADMIN')
+- `avatar` (String/URL)
+- `createdAt`, `updatedAt`
+
+### Crop / Listing Model
+- `id` (UUID)
+- `farmerId` (UUID, Foreign Key to User)
+- `title` (String)
+- `description` (Text)
+- `category` (String - e.g., 'Vegetables', 'Fruits')
+- `quantity` (Number)
+- `unit` (String - e.g., 'boxes', 'lbs', 'kg')
+- `pricePerUnit` (Number)
+- `images` (Array of Strings/URLs)
+- `status` (Enum: 'AVAILABLE', 'IN_AUCTION', 'SOLD', 'DELISTED')
+- `interestedBuyers` (Array of UUIDs, tracking who expressed interest)
+- `createdAt`, `updatedAt`
+
+### Auction Model
+- `id` (UUID)
+- `cropId` (UUID, Foreign Key to Crop)
+- `farmerId` (UUID, Foreign Key to User)
+- `startingPrice` (Number)
+- `currentHighestBid` (Number)
+- `highestBidderId` (UUID, Foreign Key to User)
+- `status` (Enum: 'UPCOMING', 'LIVE', 'COMPLETED', 'CANCELLED')
+- `startTime` (DateTime)
+- `endTime` (DateTime)
+- `createdAt`, `updatedAt`
+
+### Bid Model (For History)
+- `id` (UUID)
+- `auctionId` (UUID, Foreign Key to Auction)
+- `buyerId` (UUID, Foreign Key to User)
+- `amount` (Number)
+- `timestamp` (DateTime)
+
+### Order Model
+- `id` (UUID)
+- `buyerId` (UUID, Foreign Key to User)
+- `farmerId` (UUID, Foreign Key to User)
+- `cropId` (UUID, Foreign Key to Crop)
+- `totalAmount` (Number)
+- `orderType` (Enum: 'DIRECT_BUY', 'AUCTION_WIN')
+- `status` (Enum: 'PROCESSING', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED')
+- `createdAt`, `updatedAt`
+
+### Notification Model
+- `id` (UUID)
+- `userId` (UUID, Foreign Key to User)
+- `type` (Enum: 'AUCTION_STARTED', 'OUTBID', 'ORDER_STATUS_CHANGED')
+- `message` (String)
+- `read` (Boolean)
+- `actionUrl` (String) - e.g., `/auction/123`
+- `createdAt`
+
+---
+
+## 2. REST API Endpoints
+
+### Authentication & Users
+- `POST /api/auth/register` - Create a new user (Buyer/Farmer)
+- `POST /api/auth/login` - Authenticate and return JWT token
+- `GET /api/auth/me` - Get current authenticated user profile
+- `GET /api/users/:id` - Get public profile (e.g., Farmer details for buyer)
+
+### Crops / Marketplace
+- `GET /api/crops` - Get paginated list of available crops (with filters/search)
+- `GET /api/crops/:id` - Get details for a specific crop
+- `POST /api/crops` - (Farmer) Create a new crop listing
+- `PUT /api/crops/:id` - (Farmer) Update a listing
+- `DELETE /api/crops/:id` - (Farmer) Remove a listing
+- `POST /api/crops/:id/interest` - (Buyer) Express interest in a crop (adds buyer to `interestedBuyers` array)
+
+### Auctions
+- `POST /api/auctions` - (Farmer) Create an auction for a high-demand crop
+- `GET /api/auctions` - List all live and upcoming auctions
+- `GET /api/auctions/:id` - Get specific auction details
+- `GET /api/auctions/:id/bids` - Get bid history for an auction
+
+### Orders & Transactions
+- `POST /api/orders` - (Buyer) Purchase a crop directly (non-auction)
+- `GET /api/orders` - Get orders for the logged-in user (Buyer's purchases or Farmer's sales)
+- `PUT /api/orders/:id/status` - (Farmer) Update tracking/delivery status of an order
+
+### Notifications
+- `GET /api/notifications` - Get unread notifications for the logged-in user
+- `PUT /api/notifications/:id/read` - Mark a specific notification as read
+
+### Admin & Analytics
+- `GET /api/admin/stats` - Get platform-wide statistics (total users, total revenue, active auctions)
+- `GET /api/admin/users` - Get list of all users for moderation
+- `PUT /api/admin/users/:id/status` - Suspend or approve a user
+
+---
+
+## 3. Real-Time WebSockets Architecture (Socket.io)
+
+For the Live Auction feature to work properly, REST is not enough. You will need WebSockets:
+
+- **Event: `join_auction_room`**: Client connects to a specific `auctionId` room.
+- **Event: `place_bid`**: Client sends `{ auctionId, bidAmount, buyerId }`.
+- **Event: `bid_update`**: Server broadcasts the new highest bid and updated history to everyone in the room.
+- **Event: `auction_end`**: Server broadcasts when the timer hits zero, declaring the winner.
+- **Event: `notify_user`**: Server pushes real-time notifications to buyers (e.g., "An auction for Hass Avocados has started!").

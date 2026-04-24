@@ -103,7 +103,7 @@ export default function DashboardLayout({ children, role }) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
         {/* Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-10">
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-10 relative">
           <div className="flex items-center justify-between p-4 px-8">
             <div className="flex items-center gap-4">
               <button 
@@ -118,10 +118,40 @@ export default function DashboardLayout({ children, role }) {
             </div>
 
             <div className="flex items-center gap-4">
-              <button className="relative p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors">
-                <Bell size={20} />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-              </button>
+              <div className="relative group">
+                <button className="relative p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none">
+                  <Bell size={20} />
+                  {role === 'buyer' && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                  )}
+                </button>
+                
+                {/* Mock Notification Dropdown */}
+                {role === 'buyer' && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all z-50">
+                    <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                      <h3 className="font-bold text-brand-dark">Notifications</h3>
+                      <span className="text-xs font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">1 New</span>
+                    </div>
+                    <div className="p-2">
+                      <Link href="/auction/featured" className="block p-3 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-100 mb-1 cursor-pointer">
+                        <p className="text-sm font-bold text-orange-800 flex items-center gap-2 mb-1">
+                           <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                           Auction Started!
+                        </p>
+                        <p className="text-xs text-orange-900 leading-tight">
+                           Sunny Side Orchards just started an auction for <strong>Premium Hass Avocados</strong> you were interested in.
+                        </p>
+                        <p className="text-[10px] text-orange-600 mt-2">Just now</p>
+                      </Link>
+                    </div>
+                    <div className="p-3 text-center border-t border-gray-100">
+                      <button className="text-xs font-bold text-brand-primary hover:underline">Mark all as read</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
               <div className="h-8 w-px bg-gray-200"></div>
               <div className="flex items-center gap-2 cursor-pointer">
                 <div className="w-9 h-9 rounded-full bg-brand-light flex items-center justify-center text-white font-bold">

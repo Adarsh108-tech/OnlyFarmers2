@@ -3,8 +3,11 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Leaf, ShieldCheck, TrendingUp } from "lucide-react";
+import { useLanguage } from "@/components/LanguageProvider";
 
 export default function HeroSection() {
+  const { t } = useLanguage();
+
   return (
     <div className="relative overflow-hidden bg-brand-bg pt-24 pb-32">
       {/* Decorative background blobs */}
@@ -22,7 +25,7 @@ export default function HeroSection() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/50 text-brand-primary font-medium text-sm mb-8 border border-brand-primary/20"
           >
             <Leaf size={16} />
-            <span>Empowering local agriculture</span>
+            <span>{t("hero_badge")}</span>
           </motion.div>
 
           <motion.h1
@@ -31,9 +34,9 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-5xl md:text-7xl font-extrabold text-brand-dark tracking-tight mb-8 leading-tight"
           >
-            Fresh from the Farm, <br />
+            {t("hero_title_1")} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-light">
-              Direct to Your Table
+              {t("hero_title_2")}
             </span>
           </motion.h1>
 
@@ -43,7 +46,7 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto"
           >
-            A premium marketplace connecting buyers directly with farmers. Experience fair trade, transparent pricing, and real-time agricultural auctions.
+            {t("hero_desc")}
           </motion.p>
 
           <motion.div
@@ -56,14 +59,14 @@ export default function HeroSection() {
               href="/marketplace"
               className="flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-dark text-white px-8 py-4 rounded-2xl text-lg font-semibold transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
             >
-              Explore Marketplace
+              {t("hero_btn_explore")}
               <ArrowRight size={20} />
             </Link>
             <Link
               href="/auction/featured"
               className="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-brand-dark border-2 border-gray-200 hover:border-gray-300 px-8 py-4 rounded-2xl text-lg font-semibold transition-all shadow-sm"
             >
-              View Live Auctions
+              {t("hero_btn_auctions")}
             </Link>
           </motion.div>
         </div>
@@ -77,18 +80,18 @@ export default function HeroSection() {
           {[
             {
               icon: <ShieldCheck size={32} className="text-brand-primary" />,
-              title: "Verified Farmers",
-              description: "Every farmer is verified for quality and sustainable practices."
+              title: t("hero_feat_1_title"),
+              description: t("hero_feat_1_desc")
             },
             {
               icon: <TrendingUp size={32} className="text-brand-primary" />,
-              title: "Fair Auctions",
-              description: "Real-time bidding ensures fair market value for premium crops."
+              title: t("hero_feat_2_title"),
+              description: t("hero_feat_2_desc")
             },
             {
               icon: <Leaf size={32} className="text-brand-primary" />,
-              title: "Freshness Guaranteed",
-              description: "Direct logistics mean your produce arrives faster and fresher."
+              title: t("hero_feat_3_title"),
+              description: t("hero_feat_3_desc")
             }
           ].map((feature, idx) => (
             <div key={idx} className="bg-white/60 backdrop-blur-sm border border-white p-8 rounded-3xl shadow-sm hover:shadow-md transition-all">

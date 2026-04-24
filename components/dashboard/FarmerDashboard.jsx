@@ -13,7 +13,11 @@ const STATS = [
 const RECENT_ORDERS = [
   { id: "#ORD-092", item: "Organic Heirloom Tomatoes", buyer: "FreshMart Local", amount: "$350.00", status: "Delivered" },
   { id: "#ORD-091", item: "Premium Hass Avocados", buyer: "Sarah Jenkins", amount: "$45.00", status: "In Transit" },
-  { id: "#ORD-090", item: "Sweet Corn", buyer: "City Harvest Co.", amount: "$1,200.00", status: "Processing" },
+];
+
+const CROP_REQUESTS = [
+  { id: 1, item: "Golden Honeycrisp Apples", interested: 5, currentOffer: "$3.00/lb" },
+  { id: 2, item: "White Button Mushrooms", interested: 3, currentOffer: "$6.50/lb" },
 ];
 
 export default function FarmerDashboard() {
@@ -56,12 +60,48 @@ export default function FarmerDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Orders */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-brand-dark">Recent Orders</h3>
-            <button className="text-brand-primary text-sm font-bold hover:underline">View All</button>
+        <div className="lg:col-span-2 space-y-8">
+          
+          {/* Crop Requests (Multiple Buyers) */}
+          <div className="bg-white rounded-2xl border border-brand-primary/20 shadow-sm p-6 flex flex-col relative overflow-hidden">
+             <div className="absolute top-0 left-0 w-1 h-full bg-brand-primary"></div>
+             <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h3 className="text-lg font-bold text-brand-dark">High Demand Crops</h3>
+                  <p className="text-sm text-gray-500">Multiple buyers are interested. Consider holding an auction to maximize value.</p>
+                </div>
+             </div>
+             
+             <div className="space-y-4">
+               {CROP_REQUESTS.map((req) => (
+                 <div key={req.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50/50 gap-4">
+                    <div>
+                      <h4 className="font-bold text-brand-dark">{req.item}</h4>
+                      <p className="text-sm text-brand-primary font-semibold flex items-center gap-1 mt-1">
+                        🔥 {req.interested} buyers interested right now
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right hidden sm:block">
+                        <p className="text-xs text-gray-500">Highest Offer</p>
+                        <p className="font-bold text-gray-800">{req.currentOffer}</p>
+                      </div>
+                      <button className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold shadow-md shadow-orange-500/20 transition-all text-sm whitespace-nowrap">
+                        <Gavel size={16} />
+                        Hold Auction
+                      </button>
+                    </div>
+                 </div>
+               ))}
+             </div>
           </div>
+
+          {/* Recent Orders */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-brand-dark">Recent Orders</h3>
+              <button className="text-brand-primary text-sm font-bold hover:underline">View All</button>
+            </div>
           
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left">
@@ -95,6 +135,7 @@ export default function FarmerDashboard() {
               </tbody>
             </table>
           </div>
+        </div>
         </div>
 
         {/* Live Auctions Widget */}

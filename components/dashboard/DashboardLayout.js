@@ -3,22 +3,25 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
-import { 
-  Sprout, LayoutDashboard, ShoppingBag, 
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Sprout, LayoutDashboard, ShoppingBag,
   Settings, LogOut, Menu, X, Bell,
-  User, Tractor, ShieldAlert
+  User, Tractor, ShieldAlert, ChevronRight,
+  Search
 } from "lucide-react";
 
-export default function DashboardLayout({ children, role }) {
+export default function DashboardLayout({ children, role = "buyer" }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
 
-  // Role-specific configuration
   const roleConfig = {
     buyer: {
       title: "Buyer Portal",
-      icon: <User size={24} className="text-brand-primary" />,
+      color: "text-indigo-600",
+      bg: "bg-indigo-50",
+      accent: "bg-indigo-600",
+      icon: <User size={22} />,
       links: [
         { name: "Overview", href: "/dashboard/buyer", icon: <LayoutDashboard size={20} /> },
         { name: "My Orders", href: "/dashboard/buyer/orders", icon: <ShoppingBag size={20} /> },
@@ -26,7 +29,10 @@ export default function DashboardLayout({ children, role }) {
     },
     farmer: {
       title: "Farmer Hub",
-      icon: <Tractor size={24} className="text-orange-500" />,
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+      accent: "bg-emerald-600",
+      icon: <Tractor size={22} />,
       links: [
         { name: "Dashboard", href: "/dashboard/farmer", icon: <LayoutDashboard size={20} /> },
         { name: "My Crops", href: "/dashboard/farmer/crops", icon: <Sprout size={20} /> },
@@ -34,7 +40,10 @@ export default function DashboardLayout({ children, role }) {
     },
     admin: {
       title: "Admin Control",
-      icon: <ShieldAlert size={24} className="text-red-500" />,
+      color: "text-rose-600",
+      bg: "bg-rose-50",
+      accent: "bg-rose-600",
+      icon: <ShieldAlert size={22} />,
       links: [
         { name: "Analytics", href: "/dashboard/admin", icon: <LayoutDashboard size={20} /> },
         { name: "Users", href: "/dashboard/admin/users", icon: <User size={20} /> },
@@ -45,116 +54,107 @@ export default function DashboardLayout({ children, role }) {
   const config = roleConfig[role] || roleConfig.buyer;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-[#F8FAFC] flex font-sans text-slate-900">
       {/* Sidebar */}
-      <motion.aside 
-        initial={{ width: 280 }}
-        animate={{ width: sidebarOpen ? 280 : 0, opacity: sidebarOpen ? 1 : 0 }}
-        className="bg-white border-r border-gray-200 h-screen sticky top-0 overflow-hidden flex flex-col z-20"
-      >
-        <div className="p-6 flex items-center gap-3 border-b border-gray-100 w-[280px]">
-          <div className="bg-gray-50 p-2 rounded-xl">
-            {config.icon}
-          </div>
-          <div>
-            <h2 className="font-bold text-brand-dark text-lg leading-tight">{config.title}</h2>
-            <p className="text-xs text-gray-500">Only Farmers</p>
-          </div>
-        </div>
+      <AnimatePresence mode="wait">
+        {sidebarOpen && (
+          <motion.aside
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 288, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            // Changed h-screen to min-h-screen and added sticky top-0
+            className="hidden lg:flex flex-col bg-white border-r border-slate-200 min-h-screen sticky top-0 self-start z-30 overflow-hidden"
+          >
+            <div className="w-72 flex flex-col h-full">
+              {/* Logo Section */}
+              <div className="p-8">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`p-2.5 rounded-xl ${config.bg} ${config.color} shadow-sm`}>
+                    {config.icon}
+                  </div>
+                  <h2 className="font-extrabold text-xl tracking-tight text-slate-800">
+                    {config.title.split(' ')[0]}<span className={config.color}>{config.title.split(' ')[1]}</span>
+                  </h2>
+                </div>
+                <p className="text-[11px] uppercase tracking-widest font-bold text-slate-400 ml-1">
+                  System v2.0
+                </p>
+              </div>
 
-        <nav className="flex-1 p-4 w-[280px]">
-          <ul className="space-y-2">
-            {config.links.map((link) => (
-              <li key={link.name}>
-                <Link 
-                  href={link.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
-                    pathname === link.href 
-                      ? "bg-brand-primary text-white shadow-md shadow-brand-primary/20" 
-                      : "text-gray-600 hover:bg-gray-50 hover:text-brand-dark"
-                  }`}
-                >
-                  {link.icon}
-                  {link.name}
+              {/* Navigation */}
+              <nav className="flex-1 px-4 space-y-1">
+                {config.links.map((link) => {
+                  const isActive = pathname === link.href;
+                  return (
+                    <Link key={link.name} href={link.href} className="relative group block">
+                      <div className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${isActive ? `${config.color} ${config.bg}` : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                        }`}>
+                        {link.icon}
+                        <span className="flex-1">{link.name}</span>
+                        {isActive && (
+                          <motion.div
+                            layoutId="activeNav"
+                            className={`absolute -left-1 w-1.5 h-6 rounded-r-full ${config.accent}`}
+                          />
+                        )}
+                        <ChevronRight size={14} className={`transition-transform ${isActive ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}`} />
+                      </div>
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* Bottom Actions */}
+              <div className="p-4 border-t border-slate-100 bg-white">
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-slate-500 hover:bg-slate-50 transition-all">
+                  <Settings size={20} />
+                  Settings
+                </button>
+                <Link href="/" className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-rose-500 hover:bg-rose-50 transition-all mt-1">
+                  <LogOut size={20} />
+                  Sign Out
                 </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div className="p-4 border-t border-gray-100 w-[280px]">
-          <ul className="space-y-2">
-            <li>
-              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-600 hover:bg-gray-50 hover:text-brand-dark transition-all">
-                <Settings size={20} />
-                Settings
-              </button>
-            </li>
-            <li>
-              <Link href="/" className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-red-500 hover:bg-red-50 transition-all">
-                <LogOut size={20} />
-                Sign Out
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </motion.aside>
+              </div>
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
-        {/* Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-10 relative">
-          <div className="flex items-center justify-between p-4 px-8">
-            <div className="flex items-center gap-4">
-              <button 
+      {/* Removed h-screen and overflow-y-auto so the whole page scrolls */}
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+        {/* Modern Header */}
+        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
+          <div className="flex items-center justify-between h-20 px-8">
+            <div className="flex items-center gap-6">
+              <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+                className="p-2.5 rounded-xl bg-white text-slate-600 hover:text-slate-900 shadow-sm border border-slate-200 transition-all hover:border-slate-300"
               >
                 {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
-              <h1 className="text-xl font-bold text-brand-dark hidden sm:block">
-                Welcome back, {role === 'admin' ? 'Admin' : 'User'}!
-              </h1>
+
+              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-100/50 border border-slate-200 rounded-xl w-64 text-slate-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-slate-200 transition-all">
+                <Search size={18} />
+                <input type="text" placeholder="Search..." className="bg-transparent border-none outline-none text-sm w-full" />
+              </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="relative group">
-                <button className="relative p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none">
-                  <Bell size={20} />
-                  {role === 'buyer' && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                  )}
-                </button>
-                
-                {/* Mock Notification Dropdown */}
-                {role === 'buyer' && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all z-50">
-                    <div className="p-4 border-b border-gray-100 flex justify-between items-center">
-                      <h3 className="font-bold text-brand-dark">Notifications</h3>
-                      <span className="text-xs font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">1 New</span>
-                    </div>
-                    <div className="p-2">
-                      <Link href="/auction/featured" className="block p-3 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-100 mb-1 cursor-pointer">
-                        <p className="text-sm font-bold text-orange-800 flex items-center gap-2 mb-1">
-                           <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-                           Auction Started!
-                        </p>
-                        <p className="text-xs text-orange-900 leading-tight">
-                           Sunny Side Orchards just started an auction for <strong>Premium Hass Avocados</strong> you were interested in.
-                        </p>
-                        <p className="text-[10px] text-orange-600 mt-2">Just now</p>
-                      </Link>
-                    </div>
-                    <div className="p-3 text-center border-t border-gray-100">
-                      <button className="text-xs font-bold text-brand-primary hover:underline">Mark all as read</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="h-8 w-px bg-gray-200"></div>
-              <div className="flex items-center gap-2 cursor-pointer">
-                <div className="w-9 h-9 rounded-full bg-brand-light flex items-center justify-center text-white font-bold">
+            <div className="flex items-center gap-3">
+              <button className="relative p-2.5 rounded-xl text-slate-500 hover:bg-slate-50 transition-all">
+                <Bell size={22} />
+                <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+              </button>
+
+              <div className="h-8 w-px bg-slate-200 mx-2"></div>
+
+              <div className="flex items-center gap-3 pl-2">
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-bold text-slate-800 leading-none">Alex Johnson</p>
+                  <p className={`text-[10px] font-bold mt-1 uppercase tracking-tighter ${config.color}`}>{role}</p>
+                </div>
+                <div className={`w-10 h-10 rounded-xl ${config.accent} flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/10`}>
                   {role.charAt(0).toUpperCase()}
                 </div>
               </div>
@@ -162,11 +162,19 @@ export default function DashboardLayout({ children, role }) {
           </div>
         </header>
 
-        {/* Page Content */}
-        <div className="p-8">
-          {children}
-        </div>
-      </main>
+        {/* Content Area */}
+        <main className="p-8">
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              {children}
+            </motion.div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

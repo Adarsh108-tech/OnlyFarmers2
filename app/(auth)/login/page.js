@@ -13,8 +13,7 @@ export default function AuthPage() {
 
   const roles = [
     { id: "buyer", label: "Buyer", icon: <User size={20} />, desc: "Purchase fresh crops" },
-    { id: "farmer", label: "Farmer", icon: <Tractor size={20} />, desc: "Sell your harvest" },
-    { id: "admin", label: "Admin", icon: <ShieldAlert size={20} />, desc: "Platform management" },
+    { id: "farmer", label: "Farmer", icon: <Tractor size={20} />, desc: "Sell your harvest" }
   ];
 
   const handleSubmit = (e) => {
